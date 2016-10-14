@@ -1,0 +1,7 @@
+# doxygen
+html/
+
+# avr
+*.o
+*.elf
+*.hex
