@@ -10,8 +10,7 @@
 void mcp2515_performpgm(const uint8_t *cmds, uint8_t len)
 {
 	const uint8_t * PROGMEM end = cmds + len;
-	uint8_t c,
-	        sreg = SREG;
+	uint8_t sreg = SREG;
 
 	cli();
 	MCP2515_enable;
@@ -121,8 +120,7 @@ void can_rxh(uint8_t buffer)
 
 void can_send(uint32_t addr, uint8_t len, const uint8_t *data)
 {
-	uint8_t sreg = SREG,
-	        i;
+	uint8_t sreg = SREG;
 
 	cli();
 	MCP2515_enable;
