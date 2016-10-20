@@ -30,7 +30,7 @@
  * @see can_rxh()
  */
 #define can_get_std_id \
-	(can_addr & MCP2515_RX_ID_MASK >> 21)
+	((can_addr & MCP2515_RX_ID_MASK) >> 21)
 
 /**
  * get extended id of received can frame
