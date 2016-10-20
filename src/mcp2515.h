@@ -4,6 +4,7 @@
 #include <avr/pgmspace.h>
 
 #include "mcp2515_config.h"
+#include "mcp2515_defs.h"
 
 #define MCP2515_enable	MCP2515_CS_PORT &= ~_BV(MCP2515_CS_PIN)
 #define MCP2515_disable	MCP2515_CS_PORT |= _BV(MCP2515_CS_PIN)
@@ -19,18 +20,24 @@
 	} while (0)
 
 /**
+ * get uint32_t from can_frame.addr in right order
+ */
+#define can_addr \
+	((uint32_t) ((uint32_t) can_frame.addr[0] << 24) | ((uint32_t) can_frame.addr[1] << 16) | ((uint32_t) can_frame.addr[2] << 8) | (uint32_t) can_frame.addr[3])
+
+/**
  * get standard id of received can frame
  * @see can_rxh()
  */
 #define can_get_std_id \
-	((uint16_t)((can_frame.addr[0] << 3) & 0x07f8) | (uint16_t)((can_frame.addr[1] >> 5) & 0x0007))
+	(can_addr & MCP2515_RX_ID_MASK >> 21)
 
 /**
  * get extended id of received can frame
  * @see can_rxh()
  */
 #define can_get_ex_id \
-	(uint32_t)(((can_frame.addr[1] & 0x8c) << 16) | (can_frame.addr[2] << 8) | can_frame.addr[3])
+	(can_addr & MCP2515_RX_EID_MASK)
 
 /**
  * check if received can frame is with extended id
