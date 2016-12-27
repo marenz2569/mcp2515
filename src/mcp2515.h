@@ -200,4 +200,10 @@ void can_send(uint32_t addr, uint8_t len, const uint8_t *data);
  */
 uint8_t can_tx_busy(void);
 
+/**
+ * function that executes rxhandler function when can controller has got a packet
+ * @param rxhandler function that gets executed
+ */
+void can_rx_handler(void (*rxhandler) (void));
+
 #endif

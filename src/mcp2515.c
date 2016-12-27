@@ -156,3 +156,30 @@ uint8_t can_tx_busy(void)
 
 	return status & 0x04;
 }
+
+void can_rx_handler(void (*rx_handler) (void))
+{
+	uint8_t canintf;
+
+	MCP2515_enable;
+
+	spi_wrrd(MCP2515_READ);
+	spi_wrrd(MCP2515_CANINTF);
+	canintf = spi_wrrd(0);
+
+	MCP2515_disable;
+
+	if (canintf & MCP2515_CANINTF_RX0IF) {
+		can_rxh(0);
+		rx_handler();
+	}
+
+	if (canintf & MCP2515_CANINTF_RX1IF) {
+		can_rxh(1);
+		rx_handler();
+	}
+
+	mcp2515_perform(MCP2515_WRITE, MCP2515_CANINTF,
+	                0,
+	                0);
+}
