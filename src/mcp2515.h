@@ -20,10 +20,10 @@
 	} while (0)
 
 /**
- * get uint32_t from can_frame.addr in right order
+ * get uint32_t from can_frame.addr in right order and chop off unwanted bits
  */
 #define can_addr \
-	((uint32_t) ((uint32_t) can_frame.addr[0] << 24) | ((uint32_t) can_frame.addr[1] << 16) | ((uint32_t) can_frame.addr[2] << 8) | (uint32_t) can_frame.addr[3])
+	(((uint32_t) ((uint32_t) can_frame.addr[0] << 24) | ((uint32_t) can_frame.addr[1] << 16) | ((uint32_t) can_frame.addr[2] << 8) | (uint32_t) can_frame.addr[3]) & (MCP2515_RX_EID_FLAG | MCP2515_RX_ID_MASK | (can_is_extended?(MCP2515_RX_EID_MASK):0)))
 
 /**
  * get standard id of received can frame
@@ -204,6 +204,6 @@ uint8_t can_tx_busy(void);
  * function that executes rxhandler function when can controller has got a packet
  * @param rxhandler function that gets executed
  */
-void can_rx_handler(void (*rxhandler) (void));
+void can_rx_handler(void (*rx_handler) (void));
 
 #endif

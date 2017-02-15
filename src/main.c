@@ -28,29 +28,12 @@ int main(void)
 	return 0;
 }
 
+void nothing(void)
+{
+
+}
+
 ISR(INT0_vect)
 {
-	uint8_t canintf;
-
-	MCP2515_enable;
-
-	spi_wrrd(MCP2515_READ);
-	spi_wrrd(MCP2515_CANINTF);
-	canintf = spi_wrrd(0);
-
-	MCP2515_disable;
-
-	if (canintf & MCP2515_CANINTF_RX0IF) {
-		can_rxh(0);
-		/* handle can frame */
-	}
-	if (canintf & MCP2515_CANINTF_RX1IF) {
-		can_rxh(1);
-		/* handle can frame */
-	}
-
-	/* reset interrupt flags */
-	mcp2515_perform(MCP2515_WRITE, MCP2515_CANINTF,
-	        0x00,
-	        0x00);
+	can_rx_handler(&nothing);
 }
