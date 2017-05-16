@@ -73,7 +73,7 @@
  * @see can_send_rtr
  */
 #define can_std_id(id) \
-	(((uint32_t)id << 21) & 0xffe00000)
+	(((uint32_t) (id) << 21) & 0xffe00000)
 
 /**
  * modify 18 bit can extended id for mcp2515
@@ -81,7 +81,7 @@
  * @see can_send_rtr
  */
 #define can_ex_id(id) \
-	(((uint32_t)id & 0x0003ffff) | 0x00080000)
+	(((uint32_t) (id) & 0x0003ffff) | 0x00080000)
 
 /**
  * send a can frame with rtr
