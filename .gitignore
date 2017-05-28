@@ -5,3 +5,6 @@ html/
 *.o
 *.elf
 *.hex
+
+# config
+src/mcp2515_config.h
