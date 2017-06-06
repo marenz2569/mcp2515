@@ -4,7 +4,7 @@ void spi_init(void)
 {
 	DDRB |=
 #ifdef SPI_MASTER
-		_BV(DDB3) | _BV(DDB5)
+		_BV(DDB2) | _BV(DDB3) | _BV(DDB5)
 #else
 		_BV(DDB4)
 #endif
