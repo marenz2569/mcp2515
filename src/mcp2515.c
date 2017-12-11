@@ -1,11 +1,15 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdlib.h>
 
 #include "spi.h"
 #include "mcp2515.h"
 #include "mcp2515_defs.h"
 #include "mcp2515_config.h"
+
+struct can_frame can_buf[2] = { { .state = FREE } };
+struct can_frame *can_buffer = can_buf;
 
 void mcp2515_performpgm(const uint8_t *cmds, uint8_t len)
 {
@@ -99,20 +103,36 @@ void mcp2515_input(void)
 
 void can_rxh(uint8_t buffer)
 {
-	uint8_t c = 0,
+	uint8_t c,
 	        sreg = SREG;
+	struct can_frame *can_frame = NULL;
+
+	/* find a free buffer */
+	for (c=0; c<2; c++) {
+		if (can_buffer[c].state == FREE) {
+			can_frame = &can_buffer[c];
+			break;
+		}
+	}
+	
+	/* if no buffer is free, discard can frame */
+	if (can_frame == NULL) {
+		return;
+	}
 
 	cli();
 	MCP2515_enable;
 
 	spi_wrrd(MCP2515_READ_RXBUF + 0x04 * buffer);
 	for (c=0; c<4; c++) {
-		can_frame.addr[c] = spi_wrrd(0);
+		can_frame->addr[c] = spi_wrrd(0);
 	}
-	can_frame.dlc = spi_wrrd(0);
-	for (c=0; c<can_get_len; c++) {
-		can_frame.data[c] = spi_wrrd(0);
+	can_frame->dlc = spi_wrrd(0);
+	for (c=0; c<(can_frame->dlc & 0x0f); c++) {
+		can_frame->data[c] = spi_wrrd(0);
 	}
+
+	can_frame->state = FILLED;
 
 	MCP2515_disable;
 	SREG = sreg;
@@ -157,7 +177,7 @@ uint8_t can_tx_busy(void)
 	return status & 0x04;
 }
 
-void can_rx_handler(void (*rx_handler) (void))
+void can_rx_handler(void)
 {
 	uint8_t canintf;
 
@@ -171,12 +191,10 @@ void can_rx_handler(void (*rx_handler) (void))
 
 	if (canintf & MCP2515_CANINTF_RX0IF) {
 		can_rxh(0);
-		rx_handler();
 	}
 
 	if (canintf & MCP2515_CANINTF_RX1IF) {
 		can_rxh(1);
-		rx_handler();
 	}
 
 	mcp2515_perform(MCP2515_WRITE, MCP2515_CANINTF,

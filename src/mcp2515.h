@@ -165,13 +165,22 @@ void mcp2515_input(void);
 #endif
 
 /**
- * used to save a receive buffer
+ * used as the working buffer
  */
-struct {
+struct can_frame {
 	uint8_t addr[4],
 	        dlc,
 	        data[8];
+	enum {
+		FREE = 0,
+		FILLED = 1
+	} state;
 } can_frame;
+
+/**
+ * used as the receive buffer
+ */
+extern struct can_frame *can_buffer;
 
 /**
  * write a message from receive buffer to can_frame struct
@@ -201,9 +210,8 @@ void can_send(uint32_t addr, uint8_t len, const uint8_t *data);
 uint8_t can_tx_busy(void);
 
 /**
- * function that executes rxhandler function when can controller has got a packet
- * @param rxhandler function that gets executed
+ * function that fills the can_buffer when can controller has got a packet
  */
-void can_rx_handler(void (*rx_handler) (void));
+void can_rx_handler(void);
 
 #endif
